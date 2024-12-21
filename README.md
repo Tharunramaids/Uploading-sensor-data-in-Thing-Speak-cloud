@@ -72,9 +72,70 @@ Automatically act on your data and communicate using third-party services like T
 
 # PROGRAM:
 
+```
+#include <WiFi.h>
+#include "ThingSpeak.h" // always include thingspeak header file after other header files and custom macros
+#define Soil_Moisture 34
+char ssid[] = "1";   // your network SSID (name) 
+char pass[] = "12345678";   // your network password
+int keyIndex = 0;            // your network key Index number (needed only for WEP)
+WiFiClient  client;
+
+unsigned long myChannelNumber = 2787743;
+const int ChannelField = 1; 
+const char * myWriteAPIKey = "T5IOUX8JUG39FKKY";
+
+const int airValue = 4095;      // Analog value when the sensor is in dry air
+const int waterValue = 0;
+int percentage =0;
+void setup() {
+  Serial.begin(115200);  //Initialize serial
+  pinMode(Soil_Moisture, INPUT);
+  WiFi.mode(WIFI_STA);   
+  ThingSpeak.begin(client);  // Initialize ThingSpeak
+}
+
+void loop()
+{
+ if (WiFi.status() != WL_CONNECTED)
+  {
+    Serial.print("Attempting to connect to SSID: ");
+    Serial.println(ssid);
+    while (WiFi.status() != WL_CONNECTED)
+    {
+      WiFi.begin(ssid, pass);
+      Serial.print(".");
+      delay(5000);
+    }
+    Serial.println("\nConnected.");
+  }
+
+ /* Soil MoistureSensor */
+  int Soil_Value = analogRead(Soil_Moisture);
+  percentage = map(Soil_Value, airValue, waterValue, 0, 100);
+
+  // Ensure the percentage stays in the 0-100 range
+  percentage = constrain(percentage, 0, 100);
+  Serial.println("Soil moisture percentage");
+  Serial.println(percentage);
+  ThingSpeak.writeField(myChannelNumber, ChannelField, percentage, myWriteAPIKey);
+  
+   delay(5000); // Wait 20 seconds to update the channel again
+}
+```
+
 # CIRCUIT DIAGRAM:
 
+
+![Screenshot 2024-12-21 191403](https://github.com/user-attachments/assets/eb5d2fdd-4053-4e9b-893e-62585b0ecf2c)
+
 # OUTPUT:
+
+
+![Screenshot 2024-12-21 191207](https://github.com/user-attachments/assets/9065fb87-6889-4c91-97dc-05749f62241b)
+
+
+![Screenshot 2024-12-21 191221](https://github.com/user-attachments/assets/32ca9bdd-5a41-49c1-9470-0530ffcf977a)
 
 # RESULT:
 
